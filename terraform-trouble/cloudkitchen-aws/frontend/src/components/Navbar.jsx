@@ -20,6 +20,7 @@ const Navbar = ({ onCartClick }) => {
           <li><NavLink to="/menu"      >Menu</NavLink></li>
           <li><NavLink to="/orders"    >My Orders</NavLink></li>
           <li><NavLink to="/testimonials">Testimonials</NavLink></li>
+          <li><NavLink to="/ai-recommend" className="ai-nav-btn">🤖 Ask AI</NavLink></li>
         </ul>
 
         <button className="cart-btn" onClick={onCartClick}>

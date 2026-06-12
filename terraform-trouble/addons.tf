@@ -6,7 +6,7 @@
 # ── 1. SNS & CloudWatch Alarms ────────────────────────────────────────────
 
 resource "aws_sns_topic" "alerts" {
-  name = "${var.project_name}-alerts"
+  name = "${local.env_prefix}-alerts"
   tags = var.global_tags
 }
 
@@ -17,7 +17,7 @@ resource "aws_sns_topic_subscription" "email" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
-  alarm_name          = "${var.project_name}-alb-5xx"
+  alarm_name          = "${local.env_prefix}-alb-5xx"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 2
   metric_name         = "HTTPCode_Target_5XX_Count"
@@ -35,7 +35,7 @@ resource "aws_cloudwatch_metric_alarm" "alb_5xx" {
 # ── 2. Testimonials S3 Bucket ─────────────────────────────────────────────
 
 resource "aws_s3_bucket" "testimonials" {
-  bucket        = "${var.project_name}-testimonials-${data.aws_caller_identity.current.account_id}"
+  bucket        = "${local.env_prefix}-testimonials-${data.aws_caller_identity.current.account_id}"
   force_destroy = true
   tags          = var.global_tags
 }
@@ -77,7 +77,7 @@ data "archive_file" "notification_zip" {
 
 # Lambda IAM Role
 resource "aws_iam_role" "lambda_exec" {
-  name = "${var.project_name}-lambda-exec-role"
+  name = "${local.env_prefix}-lambda-exec-role"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -97,7 +97,7 @@ resource "aws_iam_role_policy_attachment" "lambda_logs" {
 
 # Custom policy for S3 and SNS access
 resource "aws_iam_role_policy" "lambda_custom_policy" {
-  name = "${var.project_name}-lambda-custom-policy"
+  name = "${local.env_prefix}-lambda-custom-policy"
   role = aws_iam_role.lambda_exec.id
   policy = jsonencode({
     Version = "2012-10-17"
@@ -118,7 +118,7 @@ resource "aws_iam_role_policy" "lambda_custom_policy" {
 
 # Presign Lambda Function
 resource "aws_lambda_function" "presign" {
-  function_name    = "${var.project_name}-presign-lambda"
+  function_name    = "${local.env_prefix}-presign-lambda"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "presign.handler"
   runtime          = "python3.11"
@@ -135,7 +135,7 @@ resource "aws_lambda_function" "presign" {
 
 # Notification Lambda Function
 resource "aws_lambda_function" "notification" {
-  function_name    = "${var.project_name}-notification-lambda"
+  function_name    = "${local.env_prefix}-notification-lambda"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "notification.handler"
   runtime          = "python3.11"
@@ -173,7 +173,7 @@ resource "aws_lambda_permission" "allow_s3" {
 # ── 4. API Gateway (HTTP API for Presign Lambda) ──────────────────────────
 
 resource "aws_apigatewayv2_api" "testimonials_api" {
-  name          = "${var.project_name}-testimonials-api"
+  name          = "${local.env_prefix}-testimonials-api"
   protocol_type = "HTTP"
   cors_configuration {
     allow_origins = ["*"]
@@ -216,7 +216,7 @@ resource "aws_lambda_permission" "allow_apigw" {
 
 # Frontend S3 Bucket
 resource "aws_s3_bucket" "frontend" {
-  bucket        = "${var.project_name}-frontend-${data.aws_caller_identity.current.account_id}"
+  bucket        = "${local.env_prefix}-frontend-${data.aws_caller_identity.current.account_id}"
   force_destroy = true
   tags          = var.global_tags
 }
@@ -231,7 +231,7 @@ resource "aws_s3_bucket_public_access_block" "frontend" {
 
 # CloudFront Origin Access Control for S3
 resource "aws_cloudfront_origin_access_control" "s3_oac" {
-  name                              = "${var.project_name}-s3-oac"
+  name                              = "${local.env_prefix}-s3-oac"
   description                       = "OAC for S3 buckets"
   origin_access_control_origin_type = "s3"
   signing_behavior                  = "always"
@@ -240,7 +240,7 @@ resource "aws_cloudfront_origin_access_control" "s3_oac" {
 
 # Origin Request Policy for API (Passes all viewer headers, cookies, and query strings)
 resource "aws_cloudfront_origin_request_policy" "api_orp" {
-  name    = "${var.project_name}-api-orp"
+  name    = "${local.env_prefix}-api-orp"
   comment = "Pass all viewer headers, cookies, and query strings to the API"
 
   cookies_config {
@@ -400,7 +400,7 @@ resource "aws_s3_bucket_policy" "allow_cloudfront_frontend" {
 
 resource "aws_s3_bucket" "config_logs" {
   count         = var.enable_aws_config ? 1 : 0
-  bucket        = "${var.project_name}-config-logs-${data.aws_caller_identity.current.account_id}"
+  bucket        = "${local.env_prefix}-config-logs-${data.aws_caller_identity.current.account_id}"
   force_destroy = true
   tags          = var.global_tags
 }
@@ -416,7 +416,7 @@ resource "aws_s3_bucket_public_access_block" "config_logs" {
 
 resource "aws_iam_role" "config_role" {
   count = var.enable_aws_config ? 1 : 0
-  name  = "${var.project_name}-config-role"
+  name  = "${local.env_prefix}-config-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -441,7 +441,7 @@ resource "aws_iam_role_policy_attachment" "config_policy" {
 
 resource "aws_iam_role_policy" "config_s3_policy" {
   count = var.enable_aws_config ? 1 : 0
-  name  = "${var.project_name}-config-s3-policy"
+  name  = "${local.env_prefix}-config-s3-policy"
   role  = aws_iam_role.config_role[0].id
 
   policy = jsonencode({
@@ -461,7 +461,7 @@ resource "aws_iam_role_policy" "config_s3_policy" {
 
 resource "aws_config_configuration_recorder" "main" {
   count    = var.enable_aws_config ? 1 : 0
-  name     = "${var.project_name}-config-recorder"
+  name     = "${local.env_prefix}-config-recorder"
   role_arn = aws_iam_role.config_role[0].arn
   recording_group {
     all_supported                 = true
@@ -471,7 +471,7 @@ resource "aws_config_configuration_recorder" "main" {
 
 resource "aws_config_delivery_channel" "main" {
   count          = var.enable_aws_config ? 1 : 0
-  name           = "${var.project_name}-config-delivery-channel"
+  name           = "${local.env_prefix}-config-delivery-channel"
   s3_bucket_name = aws_s3_bucket.config_logs[0].bucket
   depends_on     = [aws_config_configuration_recorder.main]
 }

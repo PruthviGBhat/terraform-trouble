@@ -1,0 +1,42 @@
+[
+  {
+    "id": "f1",
+    "name": "Paneer Butter Masala",
+    "description": "A rich and creamy curry made with paneer, spices, onions, tomatoes, cashews and butter.",
+    "ingredients": ["Paneer", "Butter", "Tomato", "Onion", "Cashews", "Cream", "Spices"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "contains_dairy", "contains_nuts"]
+  },
+  {
+    "id": "f2",
+    "name": "Veg Biryani",
+    "description": "An aromatic rice dish made with basmati rice, mixed veggies, herbs and biryani spices.",
+    "ingredients": ["Basmati Rice", "Carrot", "Peas", "Beans", "Spices", "Oil"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "vegan", "spicy"]
+  },
+  {
+    "id": "f3",
+    "name": "Chicken Curry",
+    "description": "A typical curry from the Indian subcontinent consists of chicken stewed in an onion- and tomato-based sauce.",
+    "ingredients": ["Chicken", "Onion", "Tomato", "Garlic", "Ginger", "Spices", "Oil"],
+    "category": "Main Course",
+    "dietary_tags": ["non_vegetarian", "spicy"]
+  },
+  {
+    "id": "f4",
+    "name": "Vegan Tofu Salad",
+    "description": "A healthy bowl of fresh greens topped with marinated tofu and a light vinaigrette.",
+    "ingredients": ["Tofu", "Lettuce", "Tomato", "Cucumber", "Olive Oil", "Vinegar"],
+    "category": "Salad",
+    "dietary_tags": ["vegetarian", "vegan", "gluten_free", "healthy"]
+  },
+  {
+    "id": "f5",
+    "name": "Cheese Garlic Bread",
+    "description": "Oven-baked bread topped with garlic, olive oil or butter and melted mozzarella cheese.",
+    "ingredients": ["Bread", "Garlic", "Butter", "Mozzarella Cheese"],
+    "category": "Appetizer",
+    "dietary_tags": ["vegetarian", "contains_dairy", "contains_gluten"]
+  }
+]

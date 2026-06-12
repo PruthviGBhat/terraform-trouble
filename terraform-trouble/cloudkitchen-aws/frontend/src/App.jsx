@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import Menu from './pages/Menu';
 import Orders from './pages/Orders';
 import OrderDetail from './pages/OrderDetail';   // ← ADD THIS
+import AIRecommend from './pages/AIRecommend';
 import './App.css';
 import Testimonials from './pages/Testimonials';
 
@@ -39,6 +40,7 @@ function App() {
             <Route path="/orders"       element={<Orders />} />
             <Route path="/orders/:id"   element={<OrderDetail />} />  {/* ← ADD THIS */}
             <Route path="/testimonials" element={<Testimonials />} />
+            <Route path="/ai-recommend" element={<AIRecommend />} />
           </Routes>
         </main>
 

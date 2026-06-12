@@ -34,6 +34,13 @@ provider "aws" {
 
 data "aws_caller_identity" "current" {}
 
+locals {
+  # Dynamically calculate the environment prefix based on the active Terraform workspace.
+  # "default" workspace acts as Production and uses the raw project name.
+  # e.g., "cloudkitchen" vs "cloudkitchen-dev"
+  env_prefix = terraform.workspace == "default" ? var.project_name : "${var.project_name}-${terraform.workspace}"
+}
+
 # =============================================================================
 # 1. VPC & NETWORKING
 # =============================================================================
@@ -42,12 +49,12 @@ resource "aws_vpc" "main" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags                 = merge({ Name = var.project_name }, var.global_tags)
+  tags                 = merge({ Name = local.env_prefix }, var.global_tags)
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.main.id
-  tags   = merge({ Name = "${var.project_name}-igw" }, var.global_tags)
+  tags   = merge({ Name = "${local.env_prefix}-igw" }, var.global_tags)
 }
 
 resource "aws_subnet" "public" {
@@ -59,7 +66,7 @@ resource "aws_subnet" "public" {
   cidr_block              = each.value.cidr
   availability_zone       = each.value.az
   map_public_ip_on_launch = true
-  tags                    = merge({ Name = "${var.project_name}-public-${each.key}", Tier = "Public" }, var.global_tags)
+  tags                    = merge({ Name = "${local.env_prefix}-public-${each.key}", Tier = "Public" }, var.global_tags)
 }
 
 resource "aws_subnet" "private_app" {
@@ -71,7 +78,7 @@ resource "aws_subnet" "private_app" {
   cidr_block              = each.value.cidr
   availability_zone       = each.value.az
   map_public_ip_on_launch = false
-  tags                    = merge({ Name = "${var.project_name}-app-${each.key}", Tier = "PrivateApp" }, var.global_tags)
+  tags                    = merge({ Name = "${local.env_prefix}-app-${each.key}", Tier = "PrivateApp" }, var.global_tags)
 }
 
 resource "aws_subnet" "private_db" {
@@ -83,13 +90,13 @@ resource "aws_subnet" "private_db" {
   cidr_block              = each.value.cidr
   availability_zone       = each.value.az
   map_public_ip_on_launch = false
-  tags                    = merge({ Name = "${var.project_name}-db-${each.key}", Tier = "PrivateDB" }, var.global_tags)
+  tags                    = merge({ Name = "${local.env_prefix}-db-${each.key}", Tier = "PrivateDB" }, var.global_tags)
 }
 
 resource "aws_eip" "nat" {
   for_each   = aws_subnet.public
   domain     = "vpc"
-  tags       = merge({ Name = "${var.project_name}-nat-eip-${each.key}" }, var.global_tags)
+  tags       = merge({ Name = "${local.env_prefix}-nat-eip-${each.key}" }, var.global_tags)
   depends_on = [aws_internet_gateway.igw]
 }
 
@@ -97,7 +104,7 @@ resource "aws_nat_gateway" "main" {
   for_each      = aws_subnet.public
   allocation_id = aws_eip.nat[each.key].id
   subnet_id     = each.value.id
-  tags          = merge({ Name = "${var.project_name}-nat-${each.key}" }, var.global_tags)
+  tags          = merge({ Name = "${local.env_prefix}-nat-${each.key}" }, var.global_tags)
   depends_on    = [aws_internet_gateway.igw]
 }
 
@@ -107,7 +114,7 @@ resource "aws_route_table" "public" {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.igw.id
   }
-  tags = merge({ Name = "${var.project_name}-public-rt" }, var.global_tags)
+  tags = merge({ Name = "${local.env_prefix}-public-rt" }, var.global_tags)
 }
 
 resource "aws_route_table" "private" {
@@ -117,7 +124,7 @@ resource "aws_route_table" "private" {
     cidr_block     = "0.0.0.0/0"
     nat_gateway_id = aws_nat_gateway.main[each.key].id
   }
-  tags = merge({ Name = "${var.project_name}-private-rt-${each.key}" }, var.global_tags)
+  tags = merge({ Name = "${local.env_prefix}-private-rt-${each.key}" }, var.global_tags)
 }
 
 resource "aws_route_table_association" "public" {
@@ -144,7 +151,7 @@ resource "aws_route_table_association" "private_db" {
 
 # ── External ALB ─────────────────────────────
 resource "aws_security_group" "ext_alb_sg" {
-  name        = "${var.project_name}-ext-alb-sg"
+  name        = "${local.env_prefix}-ext-alb-sg"
   description = "External ALB"
   vpc_id      = aws_vpc.main.id
 
@@ -171,12 +178,12 @@ resource "aws_security_group" "ext_alb_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ Name = "${var.project_name}-ext-alb-sg" }, var.global_tags)
+  tags = merge({ Name = "${local.env_prefix}-ext-alb-sg" }, var.global_tags)
 }
 
 # ── App Tier: Spring Boot EC2 instances ────────────────────────────────────
 resource "aws_security_group" "app_sg" {
-  name        = "${var.project_name}-app-sg"
+  name        = "${local.env_prefix}-app-sg"
   description = "App Tier - Spring Boot; receives from Ext ALB"
   vpc_id      = aws_vpc.main.id
 
@@ -195,12 +202,12 @@ resource "aws_security_group" "app_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ Name = "${var.project_name}-app-sg" }, var.global_tags)
+  tags = merge({ Name = "${local.env_prefix}-app-sg" }, var.global_tags)
 }
 
 # ── Database Tier: RDS PostgreSQL ──────────────────────────────────────────
 resource "aws_security_group" "db_sg" {
-  name        = "${var.project_name}-db-sg"
+  name        = "${local.env_prefix}-db-sg"
   description = "DB Tier - PostgreSQL 5432 from App Tier only"
   vpc_id      = aws_vpc.main.id
 
@@ -219,7 +226,7 @@ resource "aws_security_group" "db_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags = merge({ Name = "${var.project_name}-db-sg" }, var.global_tags)
+  tags = merge({ Name = "${local.env_prefix}-db-sg" }, var.global_tags)
 }
 
 # =============================================================================
@@ -232,13 +239,13 @@ resource "random_password" "db_password" {
 }
 
 resource "aws_db_subnet_group" "this" {
-  name       = "${var.project_name}-db-subnet-group"
+  name       = "${local.env_prefix}-db-subnet-group"
   subnet_ids = [for s in aws_subnet.private_db : s.id]
-  tags       = merge({ Name = "${var.project_name}-db-subnet-group" }, var.global_tags)
+  tags       = merge({ Name = "${local.env_prefix}-db-subnet-group" }, var.global_tags)
 }
 
 resource "aws_db_instance" "this" {
-  identifier        = "${var.project_name}-db"
+  identifier        = "${local.env_prefix}-db"
   engine            = "postgres"
   engine_version    = "15"
   instance_class    = var.db_instance_class
@@ -265,7 +272,7 @@ resource "aws_db_instance" "this" {
   # Performance Insights (free tier for db.t3.micro)
   performance_insights_enabled = false
 
-  tags = merge({ Name = "${var.project_name}-rds" }, var.global_tags)
+  tags = merge({ Name = "${local.env_prefix}-rds" }, var.global_tags)
 }
 
 # =============================================================================
@@ -273,7 +280,7 @@ resource "aws_db_instance" "this" {
 # =============================================================================
 
 resource "aws_secretsmanager_secret" "db" {
-  name                    = "${var.project_name}/db/credentials-new"
+  name                    = "${local.env_prefix}/db/credentials-new"
   description             = "RDS PostgreSQL credentials for CloudKitchen App Tier"
   recovery_window_in_days = 0 # allow immediate delete (useful for re-deployments)
   tags                    = var.global_tags
@@ -291,7 +298,7 @@ resource "aws_secretsmanager_secret_version" "db" {
 }
 
 resource "aws_ssm_parameter" "cors_origins" {
-  name  = "/${var.project_name}/app/cors_origins"
+  name  = "/${local.env_prefix}/app/cors_origins"
   type  = "String"
   value = var.cors_origins
   tags  = var.global_tags
@@ -305,7 +312,7 @@ resource "aws_ssm_parameter" "cors_origins" {
 
 # ── External (internet-facing) ALB ────────────────────────────────────────
 resource "aws_lb" "external" {
-  name               = "${var.project_name}-ext-alb"
+  name               = "${local.env_prefix}-ext-alb"
   internal           = false
   load_balancer_type = "application"
   security_groups    = [aws_security_group.ext_alb_sg.id]
@@ -314,12 +321,12 @@ resource "aws_lb" "external" {
   enable_deletion_protection = false
   idle_timeout               = 60
 
-  tags = merge({ Name = "${var.project_name}-ext-alb" }, var.global_tags)
+  tags = merge({ Name = "${local.env_prefix}-ext-alb" }, var.global_tags)
 }
 
 # ── Target Group: App via External ALB (port 8080) ────────────────────────
 resource "aws_lb_target_group" "app_tg" {
-  name     = "${var.project_name}-app-tg"
+  name     = "${local.env_prefix}-app-tg"
   port     = 8080
   protocol = "HTTP"
   vpc_id   = aws_vpc.main.id
@@ -355,7 +362,7 @@ resource "aws_lb_listener" "ext_http" {
 # =============================================================================
 
 resource "aws_iam_role" "app_role" {
-  name = "${var.project_name}-app-role"
+  name = "${local.env_prefix}-app-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -375,7 +382,7 @@ resource "aws_iam_role_policy_attachment" "app_ssm" {
 }
 
 resource "aws_iam_role_policy" "app_secrets_policy" {
-  name = "${var.project_name}-app-secrets-policy"
+  name = "${local.env_prefix}-app-secrets-policy"
   role = aws_iam_role.app_role.id
 
   policy = jsonencode({
@@ -391,7 +398,7 @@ resource "aws_iam_role_policy" "app_secrets_policy" {
         Sid      = "ReadSSMParams"
         Effect   = "Allow"
         Action   = ["ssm:GetParameter", "ssm:GetParameters"]
-        Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${var.project_name}/*"
+        Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${local.env_prefix}/*"
       },
       {
         Sid    = "CloudWatchLogs"
@@ -409,7 +416,7 @@ resource "aws_iam_role_policy" "app_secrets_policy" {
 }
 
 resource "aws_iam_instance_profile" "app_profile" {
-  name = "${var.project_name}-app-profile"
+  name = "${local.env_prefix}-app-profile"
   role = aws_iam_role.app_role.name
 }
 
@@ -420,7 +427,7 @@ resource "aws_iam_instance_profile" "app_profile" {
 
 # ── App Tier Launch Template ───────────────────────────────────────────────
 resource "aws_launch_template" "app" {
-  name          = "${var.project_name}-app-lt"
+  name          = "${local.env_prefix}-app-lt"
   image_id      = var.app_ami_id
   instance_type = var.app_instance_type
   key_name      = var.key_name
@@ -445,7 +452,7 @@ resource "aws_launch_template" "app" {
 
   tag_specifications {
     resource_type = "instance"
-    tags          = merge({ Name = "${var.project_name}-app" }, var.global_tags)
+    tags          = merge({ Name = "${local.env_prefix}-app" }, var.global_tags)
   }
 
   tags = var.global_tags
@@ -456,7 +463,7 @@ resource "aws_launch_template" "app" {
 # FIX: health_check_grace_period = 900 (15 min) to allow:
 #   apt-get (2min) + git clone (1min) + Maven build/download (8min) + Spring startup (2min)
 resource "aws_autoscaling_group" "app" {
-  name                      = "${var.project_name}-app-asg"
+  name                      = "${local.env_prefix}-app-asg"
   vpc_zone_identifier       = [for s in aws_subnet.private_app : s.id]
   min_size                  = 1
   max_size                  = 2
@@ -474,7 +481,7 @@ resource "aws_autoscaling_group" "app" {
 
   tag {
     key                 = "Name"
-    value               = "${var.project_name}-app"
+    value               = "${local.env_prefix}-app"
     propagate_at_launch = true
   }
 
@@ -490,7 +497,7 @@ resource "aws_autoscaling_group" "app" {
 # =============================================================================
 
 resource "aws_s3_bucket" "backups" {
-  bucket        = "${var.project_name}-db-backups-${data.aws_caller_identity.current.account_id}"
+  bucket        = "${local.env_prefix}-db-backups-${data.aws_caller_identity.current.account_id}"
   force_destroy = true # allow destroy without emptying manually
   tags          = var.global_tags
 }

@@ -29,7 +29,7 @@ data "aws_caller_identity" "current" {}
 
 resource "aws_s3_bucket" "tfstate" {
   bucket        = "cloudkitchen-tfstate-${data.aws_caller_identity.current.account_id}"
-  force_destroy = false # prevent accidental deletion of state
+  force_destroy = true # temporarily enabled to allow teardown
 
   tags = {
     Name      = "cloudkitchen-terraform-state"
