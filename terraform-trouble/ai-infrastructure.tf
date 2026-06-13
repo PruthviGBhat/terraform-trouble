@@ -89,6 +89,14 @@ resource "aws_launch_template" "ai_lt" {
     name = aws_iam_instance_profile.ai_profile.name
   }
 
+  block_device_mappings {
+    device_name = "/dev/sda1"
+    ebs {
+      volume_size = 20
+      volume_type = "gp3"
+    }
+  }
+
   vpc_security_group_ids = [aws_security_group.ai_sg.id]
 
   user_data = base64encode(templatefile("${path.module}/userdata/ai.sh", {

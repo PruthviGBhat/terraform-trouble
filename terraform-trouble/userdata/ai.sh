@@ -10,7 +10,7 @@ echo "[$(date)] Starting AI Tier setup..."
 
 # 1. Install dependencies
 apt-get update -y
-apt-get install -y python3.10 python3.10-venv python3-pip unzip awscli curl
+apt-get install -y python3 python3-venv python3-pip unzip awscli curl
 
 # Install CloudWatch Agent
 curl -fsSL https://amazoncloudwatch-agent.s3.amazonaws.com/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb -o /tmp/amazon-cloudwatch-agent.deb
@@ -19,7 +19,7 @@ dpkg -i -E /tmp/amazon-cloudwatch-agent.deb
 # 2. Download AI code from S3
 cd /opt
 echo "[$(date)] Downloading AI Recommender from S3..."
-aws s3 cp s3://${s3_bucket}/ai_recommender.zip /opt/ai_recommender.zip
+aws s3 cp s3://${s3_bucket}/deployments/ai_recommender.zip /opt/ai_recommender.zip
 unzip /opt/ai_recommender.zip -d /opt/ai_recommender
 cd /opt/ai_recommender
 
