@@ -82,7 +82,7 @@ resource "aws_iam_instance_profile" "ai_profile" {
 # AI Launch Template
 resource "aws_launch_template" "ai_lt" {
   name_prefix   = "${local.env_prefix}-ai-lt-"
-  image_id      = var.app_ami_id
+  image_id      = "ami-0326c8c1e2d6bf78c" # Ubuntu 22.04 LTS for ML package compatibility
   instance_type = "t3.medium" # Requires more RAM for AI models
 
   iam_instance_profile {
@@ -116,12 +116,20 @@ resource "aws_autoscaling_group" "ai_asg" {
   min_size            = 1
   max_size            = 2
   desired_capacity    = 1
+  health_check_grace_period = 1200 # Allow 20 minutes for PyTorch to install
 
   target_group_arns = [aws_lb_target_group.ai_tg.arn]
 
   launch_template {
     id      = aws_launch_template.ai_lt.id
     version = "$Latest"
+  }
+
+  instance_refresh {
+    strategy = "Rolling"
+    preferences {
+      min_healthy_percentage = 0
+    }
   }
 
   tag {

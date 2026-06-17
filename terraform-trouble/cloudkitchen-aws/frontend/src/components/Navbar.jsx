@@ -21,6 +21,7 @@ const Navbar = ({ onCartClick }) => {
           <li><NavLink to="/orders"    >My Orders</NavLink></li>
           <li><NavLink to="/testimonials">Testimonials</NavLink></li>
           <li><NavLink to="/ai-recommend" className="ai-nav-btn">🤖 Ask AI</NavLink></li>
+          <li><NavLink to="/admin/forecast" className="admin-nav-btn">📊 AI Dashboard</NavLink></li>
         </ul>
 
         <button className="cart-btn" onClick={onCartClick}>

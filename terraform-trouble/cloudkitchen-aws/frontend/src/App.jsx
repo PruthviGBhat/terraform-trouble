@@ -8,8 +8,9 @@ import Cart from './components/Cart';
 import Home from './pages/Home';
 import Menu from './pages/Menu';
 import Orders from './pages/Orders';
-import OrderDetail from './pages/OrderDetail';   // ← ADD THIS
+import OrderDetail from './pages/OrderDetail';
 import AIRecommend from './pages/AIRecommend';
+import AIDashboard from './pages/AIDashboard';
 import './App.css';
 import Testimonials from './pages/Testimonials';
 
@@ -38,9 +39,10 @@ function App() {
             <Route path="/"             element={<Home onCartClick={() => setCartOpen(true)} />} />
             <Route path="/menu"         element={<Menu />} />
             <Route path="/orders"       element={<Orders />} />
-            <Route path="/orders/:id"   element={<OrderDetail />} />  {/* ← ADD THIS */}
+            <Route path="/orders/:id"   element={<OrderDetail />} />
             <Route path="/testimonials" element={<Testimonials />} />
             <Route path="/ai-recommend" element={<AIRecommend />} />
+            <Route path="/admin/forecast" element={<AIDashboard />} />
           </Routes>
         </main>
 

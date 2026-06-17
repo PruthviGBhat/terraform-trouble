@@ -1,0 +1,145 @@
+.ai-dashboard-container {
+  padding: 40px 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.ai-dashboard-header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.ai-dashboard-header h1 {
+  color: #2C3E50;
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.ai-dashboard-header p {
+  color: #7F8C8D;
+  font-size: 1.1rem;
+}
+
+.ai-loading-box {
+  background: white;
+  padding: 60px 40px;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #FF6B35;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 20px auto;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ai-controls {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.restaurant-selector label {
+  font-weight: 600;
+  color: #2C3E50;
+  margin-right: 10px;
+}
+
+.restaurant-dropdown {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.ai-table-container {
+  background: white;
+  padding: 30px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+  overflow-x: auto;
+}
+
+.ai-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ai-table th, .ai-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #ECE0D8;
+}
+
+.ai-table th {
+  background: #fdfbf9;
+  color: #2C3E50;
+  font-weight: 600;
+}
+
+.item-name {
+  font-weight: 600;
+  color: #2C3E50;
+}
+
+.metric {
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.metric.highlight {
+  font-weight: 700;
+  color: #FF6B35;
+}
+
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.badge-understock {
+  background: #FFEBEE;
+  color: #E74C3C;
+}
+
+.badge-overstock {
+  background: #FFF8E1;
+  color: #F39C12;
+}
+
+.badge-optimal {
+  background: #E8F5E9;
+  color: #27AE60;
+}
+
+.explanation {
+  color: #666;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  max-width: 300px;
+}
+
+.pulsing-text {
+  animation: pulse 1.5s infinite;
+  color: #FF6B35;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}

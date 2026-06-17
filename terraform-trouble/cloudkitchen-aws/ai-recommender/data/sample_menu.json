@@ -38,5 +38,85 @@
     "ingredients": ["Bread", "Garlic", "Butter", "Mozzarella Cheese"],
     "category": "Appetizer",
     "dietary_tags": ["vegetarian", "contains_dairy", "contains_gluten"]
+  },
+  {
+    "id": "f6",
+    "name": "Spicy Chicken Wings",
+    "description": "Deep-fried chicken wings tossed in a blazing hot sauce.",
+    "ingredients": ["Chicken Wings", "Hot Sauce", "Oil", "Spices"],
+    "category": "Appetizer",
+    "dietary_tags": ["non_vegetarian", "spicy", "high_calorie"]
+  },
+  {
+    "id": "f7",
+    "name": "Gluten-Free Margherita Pizza",
+    "description": "Classic Margherita pizza on a gluten-free crust with fresh basil.",
+    "ingredients": ["Gluten-Free Flour", "Tomato Sauce", "Mozzarella", "Basil"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "gluten_free", "contains_dairy"]
+  },
+  {
+    "id": "f8",
+    "name": "Vegan Sushi Roll",
+    "description": "Avocado, cucumber, and pickled radish rolled in sushi rice and seaweed.",
+    "ingredients": ["Rice", "Seaweed", "Avocado", "Cucumber", "Pickled Radish"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "vegan", "gluten_free"]
+  },
+  {
+    "id": "f9",
+    "name": "Beef Steak",
+    "description": "Grilled beef steak served with mashed potatoes and garlic butter.",
+    "ingredients": ["Beef", "Potatoes", "Butter", "Garlic", "Salt", "Pepper"],
+    "category": "Main Course",
+    "dietary_tags": ["non_vegetarian", "contains_dairy"]
+  },
+  {
+    "id": "f10",
+    "name": "Peanut Butter Smoothie",
+    "description": "A high-protein smoothie made with peanut butter, banana, and almond milk.",
+    "ingredients": ["Peanut Butter", "Banana", "Almond Milk", "Protein Powder"],
+    "category": "Beverage",
+    "dietary_tags": ["vegetarian", "vegan", "contains_nuts", "healthy"]
+  },
+  {
+    "id": "f11",
+    "name": "Fish and Chips",
+    "description": "Crispy battered fish served with golden french fries and tartar sauce.",
+    "ingredients": ["White Fish", "Potatoes", "Flour", "Oil", "Tartar Sauce"],
+    "category": "Main Course",
+    "dietary_tags": ["non_vegetarian", "contains_gluten", "contains_seafood"]
+  },
+  {
+    "id": "f12",
+    "name": "Mushroom Risotto",
+    "description": "Creamy Arborio rice cooked with wild mushrooms and parmesan cheese.",
+    "ingredients": ["Arborio Rice", "Mushrooms", "Parmesan", "Butter", "Broth"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "contains_dairy"]
+  },
+  {
+    "id": "f13",
+    "name": "Lentil Soup",
+    "description": "A warm and hearty soup made with red lentils, carrots, and warm spices.",
+    "ingredients": ["Red Lentils", "Carrots", "Onions", "Spices", "Water"],
+    "category": "Soup",
+    "dietary_tags": ["vegetarian", "vegan", "gluten_free", "healthy"]
+  },
+  {
+    "id": "f14",
+    "name": "Spicy Thai Green Curry",
+    "description": "Authentic Thai green curry with coconut milk, bamboo shoots, and vegetables.",
+    "ingredients": ["Coconut Milk", "Green Curry Paste", "Bamboo Shoots", "Vegetables"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "vegan", "spicy", "gluten_free"]
+  },
+  {
+    "id": "f15",
+    "name": "Chocolate Lava Cake",
+    "description": "Decadent chocolate cake with a molten chocolate center.",
+    "ingredients": ["Flour", "Sugar", "Butter", "Eggs", "Cocoa Powder"],
+    "category": "Dessert",
+    "dietary_tags": ["vegetarian", "contains_dairy", "contains_gluten", "high_calorie"]
   }
 ]

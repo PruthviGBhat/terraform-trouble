@@ -8,7 +8,13 @@ set -ex
 exec > /var/log/userdata-ai.log 2>&1
 echo "[$(date)] Starting AI Tier setup..."
 
-# 1. Install dependencies
+# 1. Wait for network and install dependencies
+echo "[$(date)] Waiting for network to initialize..."
+until ping -c 1 archive.ubuntu.com &> /dev/null; do
+  echo "Network unreachable. Retrying in 5 seconds..."
+  sleep 5
+done
+
 apt-get update -y
 apt-get install -y python3 python3-venv python3-pip unzip awscli curl
 
@@ -28,7 +34,7 @@ echo "[$(date)] Setting up Python virtual environment..."
 python3 -m venv venv
 source venv/bin/activate
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install --no-cache-dir -r requirements.txt
 
 # 4. Create systemd service for FastAPI
 echo "[$(date)] Creating systemd service..."

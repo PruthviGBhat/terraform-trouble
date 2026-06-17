@@ -9,6 +9,8 @@ const AIRecommend = () => {
     vegan: false,
     lactoseIntolerant: false
   });
+  const [customDiet, setCustomDiet] = useState('');
+  const [numOptions, setNumOptions] = useState(3);
   const [loading, setLoading] = useState(false);
   const [recommendations, setRecommendations] = useState([]);
 
@@ -29,10 +31,16 @@ const AIRecommend = () => {
 
     // Map UI checkboxes to API format
     const prefList = [];
-    const allergyList = [];
+    let allergyList = [];
     if (preferences.vegetarian) prefList.push("vegetarian");
     if (preferences.vegan) prefList.push("vegan");
     if (preferences.lactoseIntolerant) allergyList.push("contains_dairy");
+
+    // Add custom dietary exclusions
+    if (customDiet.trim()) {
+        const customTags = customDiet.split(',').map(tag => tag.trim().toLowerCase()).filter(tag => tag.length > 0);
+        allergyList = [...allergyList, ...customTags];
+    }
 
     try {
       // 1. Update preferences (we use an anonymous user session for this demo)
@@ -53,7 +61,7 @@ const AIRecommend = () => {
         body: JSON.stringify({
           user_id: "anon_user_1",
           query: query,
-          top_k: 2
+          top_k: Number(numOptions)
         })
       });
 
@@ -93,7 +101,7 @@ const AIRecommend = () => {
         </div>
 
         <div className="form-group diet-options">
-          <label>Dietary Restrictions:</label>
+          <label>Standard Restrictions:</label>
           <div className="checkboxes">
             <label>
               <input type="checkbox" name="vegetarian" checked={preferences.vegetarian} onChange={handleCheckboxChange} />
@@ -108,6 +116,28 @@ const AIRecommend = () => {
               Lactose Intolerant (No Dairy)
             </label>
           </div>
+        </div>
+
+        <div className="form-group">
+          <label>Custom Exclusions (comma-separated tags):</label>
+          <input 
+            type="text" 
+            placeholder="e.g., contains_nuts, contains_gluten, high_calorie" 
+            value={customDiet}
+            onChange={(e) => setCustomDiet(e.target.value)}
+          />
+          <small className="help-text">Any food with these tags will be strictly filtered out by the AI.</small>
+        </div>
+
+        <div className="form-group">
+            <label>Number of Options:</label>
+            <select value={numOptions} onChange={(e) => setNumOptions(e.target.value)}>
+                <option value="1">1 Option</option>
+                <option value="2">2 Options</option>
+                <option value="3">3 Options</option>
+                <option value="5">5 Options</option>
+                <option value="10">10 Options</option>
+            </select>
         </div>
 
         <button type="submit" className="btn-primary" disabled={loading}>

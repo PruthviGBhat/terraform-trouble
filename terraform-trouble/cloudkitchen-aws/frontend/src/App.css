@@ -89,6 +89,13 @@ body {
   border-radius: 20px;
   border: 1px solid var(--border);
 }
+.admin-nav-btn {
+  background: #FFF8E1;
+  color: #F39C12;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid #F39C12;
+}
 .cart-badge    { background: var(--secondary); color: white;
                  border-radius: 50%; width: 22px; height: 22px;
                  display: flex; align-items: center; justify-content: center;

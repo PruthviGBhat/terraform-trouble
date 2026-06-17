@@ -483,6 +483,31 @@ resource "aws_config_configuration_recorder_status" "main" {
   depends_on = [aws_config_delivery_channel.main]
 }
 
+# ── 6. Automated Frontend Deployment ────────────────────────────────────────
+
+resource "null_resource" "deploy_frontend" {
+  triggers = {
+    # Forces this to run every time `terraform apply` is executed
+    always_run = timestamp()
+  }
+
+  provisioner "local-exec" {
+    working_dir = "${path.module}/cloudkitchen-aws/frontend"
+    command     = "call npm install && call npm run build && aws s3 sync build/ s3://${aws_s3_bucket.frontend.id} --delete && aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.cdn.id} --paths /*"
+    
+    environment = {
+      # Injects the API Gateway URL dynamically so you never have to manually edit .env again!
+      REACT_APP_API_GATEWAY_URL = "${aws_apigatewayv2_api.testimonials_api.api_endpoint}"
+    }
+  }
+
+  depends_on = [
+    aws_s3_bucket.frontend,
+    aws_cloudfront_distribution.cdn,
+    aws_apigatewayv2_api.testimonials_api
+  ]
+}
+
 # AWS Config Managed Rule: S3 Bucket Public Read Prohibited
 resource "aws_config_config_rule" "s3_public_read_prohibited" {
   count = var.enable_aws_config ? 1 : 0
