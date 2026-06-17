@@ -44,15 +44,19 @@ Thumbs.db
 *.key
 *.rsa
 
-# ── Python (for Lambda functions) ────────────────────────────────────────
+# ── Python ────────────────────────────────────────────────────────────────
 __pycache__/
 *.pyc
 *.pyo
-lambda/*.zip
 
-# ── Node.js (frontend node_modules are large) ────────────────────────────
-cloudkitchen-aws/frontend/node_modules/
-cloudkitchen-aws/frontend/build/
+# ── Terraform-generated zip bundles (recreated on every apply) ────────────
+*.zip
+
+# ── Node.js ───────────────────────────────────────────────────────────────
+services/frontend/node_modules/
+services/frontend/build/
 
 # ── Java build artifacts ──────────────────────────────────────────────────
-cloudkitchen-aws/backend/**/target/
+services/**/target/
+
+.claude

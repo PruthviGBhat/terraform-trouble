@@ -1,0 +1,137 @@
+[
+  {
+    "id": "f1",
+    "name": "Paneer Butter Masala",
+    "description": "Rich, creamy curry with soft paneer cubes in a spiced tomato-cashew gravy. A North Indian classic.",
+    "ingredients": ["Paneer", "Butter", "Tomato", "Onion", "Cashews", "Cream", "Spices"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "contains_dairy", "contains_nuts"],
+    "price": 280.0
+  },
+  {
+    "id": "f2",
+    "name": "Veg Biryani",
+    "description": "Aromatic long-grain basmati rice layered with seasonal vegetables, saffron, and whole spices.",
+    "ingredients": ["Basmati Rice", "Carrot", "Peas", "Beans", "Saffron", "Whole Spices"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "vegan", "spicy"],
+    "price": 220.0
+  },
+  {
+    "id": "f3",
+    "name": "Chicken Curry",
+    "description": "Tender chicken pieces slow-cooked in a deeply spiced onion-tomato masala. Pairs perfectly with naan.",
+    "ingredients": ["Chicken", "Onion", "Tomato", "Garlic", "Ginger", "Spices"],
+    "category": "Main Course",
+    "dietary_tags": ["non_vegetarian", "spicy"],
+    "price": 320.0
+  },
+  {
+    "id": "f4",
+    "name": "Vegan Tofu Salad",
+    "description": "Fresh garden greens topped with golden pan-seared tofu and a zesty lemon vinaigrette.",
+    "ingredients": ["Tofu", "Lettuce", "Cherry Tomato", "Cucumber", "Olive Oil", "Lemon"],
+    "category": "Salad",
+    "dietary_tags": ["vegetarian", "vegan", "gluten_free", "healthy"],
+    "price": 180.0
+  },
+  {
+    "id": "f5",
+    "name": "Cheese Garlic Bread",
+    "description": "Oven-toasted artisan bread smothered in garlic herb butter and melted mozzarella. Irresistible starter.",
+    "ingredients": ["Artisan Bread", "Garlic", "Herb Butter", "Mozzarella"],
+    "category": "Appetizer",
+    "dietary_tags": ["vegetarian", "contains_dairy", "contains_gluten"],
+    "price": 120.0
+  },
+  {
+    "id": "f6",
+    "name": "Spicy Chicken Wings",
+    "description": "Crispy double-fried wings tossed in a house-made sriracha-honey glaze. Dangerously addictive.",
+    "ingredients": ["Chicken Wings", "Sriracha", "Honey", "Garlic", "Spices"],
+    "category": "Appetizer",
+    "dietary_tags": ["non_vegetarian", "spicy", "high_calorie"],
+    "price": 280.0
+  },
+  {
+    "id": "f7",
+    "name": "Gluten-Free Margherita Pizza",
+    "description": "Stone-baked on a crispy gluten-free base with San Marzano tomato sauce, fresh mozzarella and basil.",
+    "ingredients": ["GF Flour", "San Marzano Tomato", "Fresh Mozzarella", "Basil", "Olive Oil"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "gluten_free", "contains_dairy"],
+    "price": 350.0
+  },
+  {
+    "id": "f8",
+    "name": "Vegan Sushi Roll",
+    "description": "Inside-out roll filled with creamy avocado, crunchy cucumber, and tangy pickled daikon.",
+    "ingredients": ["Sushi Rice", "Nori", "Avocado", "Cucumber", "Pickled Daikon"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "vegan", "gluten_free"],
+    "price": 280.0
+  },
+  {
+    "id": "f9",
+    "name": "Grilled Chicken Steak",
+    "description": "Juicy grilled chicken breast marinated in herbs, served with roasted vegetables and peppercorn sauce.",
+    "ingredients": ["Chicken Breast", "Roasted Veggies", "Peppercorn Sauce", "Herbs"],
+    "category": "Main Course",
+    "dietary_tags": ["non_vegetarian", "gluten_free", "healthy"],
+    "price": 380.0
+  },
+  {
+    "id": "f10",
+    "name": "Mango Protein Smoothie",
+    "description": "Thick, refreshing blend of Alphonso mango, banana, almond milk and plant protein powder.",
+    "ingredients": ["Alphonso Mango", "Banana", "Almond Milk", "Plant Protein"],
+    "category": "Beverage",
+    "dietary_tags": ["vegetarian", "vegan", "healthy", "gluten_free"],
+    "price": 120.0
+  },
+  {
+    "id": "f11",
+    "name": "Fish and Chips",
+    "description": "Golden beer-battered fish fillet with thick-cut chips, mushy peas, and homemade tartar sauce.",
+    "ingredients": ["White Fish", "Potatoes", "Beer Batter", "Mushy Peas", "Tartar Sauce"],
+    "category": "Main Course",
+    "dietary_tags": ["non_vegetarian", "contains_gluten", "contains_seafood"],
+    "price": 320.0
+  },
+  {
+    "id": "f12",
+    "name": "Mushroom Risotto",
+    "description": "Slow-stirred Arborio rice with a medley of wild mushrooms, white wine and aged parmesan.",
+    "ingredients": ["Arborio Rice", "Wild Mushrooms", "Parmesan", "White Wine", "Butter"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "contains_dairy", "gluten_free"],
+    "price": 280.0
+  },
+  {
+    "id": "f13",
+    "name": "Red Lentil Soup",
+    "description": "Warming bowl of red lentils slow-cooked with carrots, cumin, turmeric and a squeeze of lemon.",
+    "ingredients": ["Red Lentils", "Carrot", "Onion", "Cumin", "Turmeric", "Lemon"],
+    "category": "Soup",
+    "dietary_tags": ["vegetarian", "vegan", "gluten_free", "healthy"],
+    "price": 140.0
+  },
+  {
+    "id": "f14",
+    "name": "Thai Green Curry",
+    "description": "Fragrant coconut-milk curry with bamboo shoots, Thai basil, and seasonal vegetables. Authentically spicy.",
+    "ingredients": ["Coconut Milk", "Green Curry Paste", "Bamboo Shoots", "Thai Basil", "Vegetables"],
+    "category": "Main Course",
+    "dietary_tags": ["vegetarian", "vegan", "spicy", "gluten_free"],
+    "price": 260.0
+  },
+  {
+    "id": "f15",
+    "name": "Chocolate Lava Cake",
+    "description": "Warm dark-chocolate cake with a molten liquid centre, served with vanilla bean ice cream.",
+    "ingredients": ["Dark Chocolate", "Butter", "Eggs", "Sugar", "Flour", "Vanilla Ice Cream"],
+    "category": "Dessert",
+    "dietary_tags": ["vegetarian", "contains_dairy", "contains_gluten", "high_calorie"],
+    "price": 160.0
+  }
+]

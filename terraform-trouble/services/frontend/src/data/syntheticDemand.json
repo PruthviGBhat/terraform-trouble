@@ -1,0 +1,21 @@
+[
+  { "id": "nik1", "kitchen": "North Indian Kitchen", "name": "Paneer Butter Masala", "inventory": 45, "baseDemand": 52, "weekendMultiplier": 1.8 },
+  { "id": "nik2", "kitchen": "North Indian Kitchen", "name": "Dal Makhani",           "inventory": 60, "baseDemand": 40, "weekendMultiplier": 1.5 },
+  { "id": "nik3", "kitchen": "North Indian Kitchen", "name": "Chicken Biryani",        "inventory": 30, "baseDemand": 65, "weekendMultiplier": 2.0 },
+  { "id": "nik4", "kitchen": "North Indian Kitchen", "name": "Garlic Naan",            "inventory": 120,"baseDemand": 90, "weekendMultiplier": 1.6 },
+
+  { "id": "sfc1", "kitchen": "Street Food Corner",   "name": "Samosa (4 pcs)",         "inventory": 80, "baseDemand": 95, "weekendMultiplier": 2.2 },
+  { "id": "sfc2", "kitchen": "Street Food Corner",   "name": "Pav Bhaji",              "inventory": 50, "baseDemand": 45, "weekendMultiplier": 1.7 },
+  { "id": "sfc3", "kitchen": "Street Food Corner",   "name": "Aloo Tikki Chaat",       "inventory": 40, "baseDemand": 38, "weekendMultiplier": 1.9 },
+  { "id": "sfc4", "kitchen": "Street Food Corner",   "name": "Veg Frankie",            "inventory": 35, "baseDemand": 55, "weekendMultiplier": 1.6 },
+
+  { "id": "ck1",  "kitchen": "Continental Kitchen",  "name": "Pasta Arrabiata",        "inventory": 40, "baseDemand": 28, "weekendMultiplier": 1.4 },
+  { "id": "ck2",  "kitchen": "Continental Kitchen",  "name": "Mushroom Risotto",       "inventory": 25, "baseDemand": 22, "weekendMultiplier": 1.3 },
+  { "id": "ck3",  "kitchen": "Continental Kitchen",  "name": "Garlic Bread",           "inventory": 60, "baseDemand": 70, "weekendMultiplier": 1.5 },
+  { "id": "ck4",  "kitchen": "Continental Kitchen",  "name": "Caesar Salad",           "inventory": 30, "baseDemand": 18, "weekendMultiplier": 1.2 },
+
+  { "id": "ds1",  "kitchen": "Dessert Studio",       "name": "Gulab Jamun (6 pcs)",    "inventory": 50, "baseDemand": 62, "weekendMultiplier": 2.1 },
+  { "id": "ds2",  "kitchen": "Dessert Studio",       "name": "Chocolate Brownie",      "inventory": 35, "baseDemand": 48, "weekendMultiplier": 1.9 },
+  { "id": "ds3",  "kitchen": "Dessert Studio",       "name": "Mango Lassi",            "inventory": 40, "baseDemand": 35, "weekendMultiplier": 1.6 },
+  { "id": "ds4",  "kitchen": "Dessert Studio",       "name": "Kulfi Ice Cream",        "inventory": 45, "baseDemand": 40, "weekendMultiplier": 1.8 }
+]
