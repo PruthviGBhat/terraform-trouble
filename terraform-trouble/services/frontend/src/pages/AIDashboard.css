@@ -43,6 +43,16 @@
   letter-spacing: 0.04em;
 }
 
+.period-badge {
+  background: #EDE7F6;
+  color: #4527A0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 50px;
+  letter-spacing: 0.03em;
+}
+
 .dash-controls {
   display: flex;
   align-items: center;

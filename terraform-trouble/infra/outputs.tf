@@ -176,6 +176,67 @@ output "order_service_endpoints" {
   EOT
 }
 
+# ── EKS ───────────────────────────────────────────────────────────────────
+
+output "eks_cluster_name" {
+  description = "EKS cluster name"
+  value       = aws_eks_cluster.cloudkitchen.name
+}
+
+output "eks_cluster_endpoint" {
+  description = "EKS API server endpoint"
+  value       = aws_eks_cluster.cloudkitchen.endpoint
+}
+
+output "eks_kubeconfig_command" {
+  description = "Run this after apply to configure kubectl"
+  value       = "aws eks update-kubeconfig --name ${aws_eks_cluster.cloudkitchen.name} --region ${var.aws_region}"
+}
+
+output "ecr_push_commands" {
+  description = "Commands to authenticate Docker to ECR and push images"
+  value       = <<-EOT
+    # 1. Authenticate Docker to ECR
+    aws ecr get-login-password --region ${var.aws_region} | \
+      docker login --username AWS --password-stdin \
+      ${data.aws_caller_identity.current.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com
+
+    # 2. Build and push each service (run from repo root)
+    # menu-service
+    docker build -t ${aws_ecr_repository.menu_repo.repository_url}:latest ./terraform-trouble/services/menu-service
+    docker push ${aws_ecr_repository.menu_repo.repository_url}:latest
+
+    # order-service
+    docker build -t ${aws_ecr_repository.order_repo.repository_url}:latest ./terraform-trouble/services/order-service
+    docker push ${aws_ecr_repository.order_repo.repository_url}:latest
+
+    # auth-service
+    docker build -t ${aws_ecr_repository.auth_repo.repository_url}:latest ./terraform-trouble/services/auth-service
+    docker push ${aws_ecr_repository.auth_repo.repository_url}:latest
+
+    # ai-recommender
+    docker build -t ${aws_ecr_repository.ai_repo.repository_url}:latest ./terraform-trouble/services/ai-recommender
+    docker push ${aws_ecr_repository.ai_repo.repository_url}:latest
+  EOT
+}
+
+# ── DR Agent ──────────────────────────────────────────────────────────────
+
+output "dr_agent_function_name" {
+  description = "Lambda function name of the DR Agent"
+  value       = aws_lambda_function.dr_agent.function_name
+}
+
+output "dr_agent_log_group" {
+  description = "CloudWatch log group for DR Agent runs"
+  value       = "/aws/lambda/${aws_lambda_function.dr_agent.function_name}"
+}
+
+output "dr_agent_schedule" {
+  description = "EventBridge schedule — daily at 02:00 UTC"
+  value       = aws_cloudwatch_event_rule.dr_agent_schedule.schedule_expression
+}
+
 # ── SQS Queues ────────────────────────────────────────────────────────────
 
 output "sqs_orders_queue_url" {

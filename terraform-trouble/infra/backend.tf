@@ -30,12 +30,12 @@
 
 # Uncomment the block below after completing the steps above:
 
- terraform {
-   backend "s3" {
-     bucket         = "cloudkitchen-tfstate-256603361470"   # ← fill in account ID
-     key            = "cloudkitchen/terraform.tfstate"
+terraform {
+  backend "s3" {
+    bucket         = "cloudkitchen-tfstate-REPLACE_WITH_YOUR_ACCOUNT_ID"
+    key            = "cloudkitchen/terraform.tfstate"
     region         = "ap-south-1"
     dynamodb_table = "cloudkitchen-tfstate-lock"
-     encrypt        = true
-   }
- }
+    encrypt        = true
+  }
+}

@@ -52,6 +52,9 @@ __pycache__/
 # ── Terraform-generated zip bundles (recreated on every apply) ────────────
 *.zip
 
+# ── Lambda build output (recreated by null_resource on every apply) ───────
+infra/lambda/dr-agent/package/
+
 # ── Node.js ───────────────────────────────────────────────────────────────
 services/frontend/node_modules/
 services/frontend/build/

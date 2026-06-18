@@ -3,7 +3,7 @@ import VideoUploader from '../components/VideoUploader';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = process.env.REACT_APP_TESTIMONIAL_API || 'https://your-api-id.execute-api.ap-south-1.amazonaws.com/prod';
+const API_BASE = process.env.REACT_APP_API_GATEWAY_URL || '';
 
 const Testimonials = () => {
   const navigate = useNavigate();
@@ -21,7 +21,7 @@ const Testimonials = () => {
     setUploading(true);
     try {
       // 1. Get pre-signed URL
-      const res = await fetch(`${API_BASE}/testimonials/presign`, {
+      const res = await fetch(`${API_BASE}/api/testimonials/presign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename: `testimonial-${Date.now()}.webm`, contentType: videoBlob.type })
