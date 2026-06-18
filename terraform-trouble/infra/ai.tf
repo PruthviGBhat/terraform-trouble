@@ -83,7 +83,7 @@ resource "aws_iam_instance_profile" "ai_profile" {
 resource "aws_launch_template" "ai_lt" {
   name_prefix   = "${local.env_prefix}-ai-lt-"
   image_id      = "ami-0326c8c1e2d6bf78c" # Ubuntu 22.04 LTS for ML package compatibility
-  instance_type = "t3.medium" # Requires more RAM for AI models
+  instance_type = "t3.medium" # 4 GB RAM: sufficient for llama3.2:1b (~620 MB) + FastAPI stack (~1.4 GB)
 
   iam_instance_profile {
     name = aws_iam_instance_profile.ai_profile.name
@@ -103,6 +103,7 @@ resource "aws_launch_template" "ai_lt" {
     s3_bucket     = aws_s3_bucket.testimonials.bucket
     sqs_queue_url = aws_sqs_queue.orders_queue.url
     aws_region    = var.aws_region
+    hf_api_token  = var.hf_api_token
   }))
 
   tag_specifications {
@@ -118,7 +119,7 @@ resource "aws_autoscaling_group" "ai_asg" {
   min_size            = 1
   max_size            = 2
   desired_capacity    = 1
-  health_check_grace_period = 1200 # Allow 20 minutes for PyTorch to install
+  health_check_grace_period = 1200 # Allow 20 min: apt + pip install (sentence-transformers, chromadb)
 
   target_group_arns = [aws_lb_target_group.ai_tg.arn]
 
@@ -149,7 +150,7 @@ resource "aws_lb_target_group" "ai_tg" {
   vpc_id   = aws_vpc.main.id
 
   health_check {
-    path                = "/docs" # FastAPI default docs endpoint
+    path                = "/api/health"
     port                = "traffic-port"
     interval            = 30
     timeout             = 10

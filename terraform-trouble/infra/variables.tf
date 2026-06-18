@@ -147,6 +147,16 @@ variable "admin_email" {
 }
 
 # =============================================================================
+# AI SERVICE
+# =============================================================================
+
+variable "hf_api_token" {
+  description = "HuggingFace Inference API token — free at huggingface.co/settings/tokens"
+  type        = string
+  sensitive   = true
+}
+
+# =============================================================================
 # OPTIONAL FEATURES
 # =============================================================================
 

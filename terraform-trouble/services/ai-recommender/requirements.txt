@@ -1,11 +1,10 @@
 fastapi==0.104.1
 uvicorn==0.23.2
 pydantic==2.4.2
-langchain==0.0.335
-chromadb==0.4.15
-sentence-transformers==2.2.2
-transformers==4.35.0
---extra-index-url https://download.pytorch.org/whl/cpu
-torch
-accelerate==0.24.1
+langchain==0.3.7
+langchain-huggingface==0.1.2
+langchain-core==0.3.15
+huggingface-hub>=0.24.0
+chromadb==0.5.23
+sentence-transformers==3.3.1
 boto3>=1.28.0

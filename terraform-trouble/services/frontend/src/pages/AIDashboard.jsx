@@ -1,50 +1,115 @@
 // src/pages/AIDashboard.jsx
-// Demand Forecasting Dashboard — no client-side model download.
-// Predictions are deterministic (based on day-of-week).
-// AI insights are fetched from the backend /api/recommend_forecast endpoint.
+// Demand Forecasting Dashboard
+// Predictions factor in: time-of-day, day-of-week, weekend surge, and recent trend.
+// AI narrative insights are fetched from the backend /api/recommend_forecast endpoint.
 
 import React, { useState, useEffect, useCallback } from 'react';
-import toast from 'react-hot-toast';
 import allData from '../data/syntheticDemand.json';
 import './AIDashboard.css';
 
-const KITCHENS = [...new Set(allData.map(d => d.kitchen))];
+const KITCHENS   = [...new Set(allData.map(d => d.kitchen))];
+const DAY_NAMES  = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-// Deterministic demand prediction — same result for the same item on the same day.
+// ── Demand prediction ────────────────────────────────────────────────────────
+// Combines day-of-week, time-of-day, and recent trend into a single demand estimate.
 const predictDemand = (item) => {
-  const day      = new Date().getDay();
-  const isWeekend = day === 0 || day === 6;
-  // Pseudo-variance from item id hash so each item varies slightly
+  const now        = new Date();
+  const day        = now.getDay();
+  const hour       = now.getHours();
+  const isWeekend  = day === 0 || day === 6;
+
+  // Service-period classification and time multiplier
+  let period, timeFactor;
+  if (hour >= 7 && hour < 11) {
+    period     = 'Morning Prep';
+    timeFactor = 0.55;
+  } else if (hour >= 11 && hour <= 14) {
+    period     = 'Lunch Rush';
+    timeFactor = item.lunchFactor ?? 1.3;
+  } else if (hour >= 15 && hour <= 17) {
+    period     = 'Afternoon Lull';
+    timeFactor = 0.65;
+  } else if (hour >= 18 && hour <= 21) {
+    period     = 'Dinner Service';
+    timeFactor = item.dinnerFactor ?? 1.5;
+  } else if (hour >= 22 || hour < 7) {
+    period     = 'Off-Peak';
+    timeFactor = 0.25;
+  } else {
+    period     = 'Active';
+    timeFactor = 1.0;
+  }
+
+  // Trend multiplier — 3-day rolling trend encoded in data
+  const trendMultiplier =
+    item.trend === 'rising'  ? 1.12 :
+    item.trend === 'falling' ? 0.88 : 1.0;
+
+  // Small deterministic variance per item (avoids all bars being identical)
   const hash     = [...item.id].reduce((a, c) => (a * 31 + c.charCodeAt(0)) % 100, 0);
-  const variance = Math.floor(hash * 0.18) - 9; // -9 to +9
-  let demand     = item.baseDemand + variance;
+  const variance = Math.floor(hash * 0.08) - 4;
+
+  let demand = item.baseDemand;
   if (isWeekend) demand = Math.round(demand * item.weekendMultiplier);
-  return { demand: Math.max(1, Math.round(demand)), isWeekend, dayName: DAY_NAMES[day] };
+  demand = Math.round(demand * timeFactor * trendMultiplier) + variance;
+
+  return {
+    demand:    Math.max(1, demand),
+    isWeekend,
+    dayName:   DAY_NAMES[day],
+    period,
+    trend:     item.trend ?? 'stable',
+    timeFactor,
+  };
 };
 
-const computeRisk = (inventory, demand) => {
-  const gap = demand - inventory;
-  if (gap > 10)               return { risk: 'UNDERSTOCK', action: `Prep ${gap} more units before service.` };
-  if (inventory - demand > 20) return { risk: 'OVERSTOCK',  action: 'Offer a 15% flash deal to move excess.' };
-  return                              { risk: 'OPTIMAL',    action: 'Inventory well-matched to demand.' };
+// ── Risk computation ─────────────────────────────────────────────────────────
+// Perishability influences overstock urgency — a 2-hour item going stale is
+// more critical than one that keeps for 24 hours.
+const computeRisk = (inventory, demand, item) => {
+  const gap    = demand - inventory;
+  const excess = inventory - demand;
+
+  if (gap > 10) {
+    const severity = gap > 25 ? 'critically' : 'significantly';
+    return {
+      risk:   'UNDERSTOCK',
+      action: `Demand ${severity} exceeds stock by ${gap} units — prep immediately.`,
+    };
+  }
+  if (excess > 20) {
+    const perishSoon = (item?.perishabilityHours ?? 24) <= 3;
+    return {
+      risk:   'OVERSTOCK',
+      action: perishSoon
+        ? `${excess} excess units spoil in ${item.perishabilityHours}h — run flash deal NOW.`
+        : `${excess} surplus units — offer 15% discount to clear before close.`,
+    };
+  }
+  return { risk: 'OPTIMAL', action: 'Inventory well-matched to expected demand.' };
 };
 
+// ── Row builder ───────────────────────────────────────────────────────────────
 const buildRows = (kitchen) =>
   allData
     .filter(d => d.kitchen === kitchen)
     .map(item => {
-      const { demand, isWeekend, dayName } = predictDemand(item);
-      const { risk, action }               = computeRisk(item.inventory, demand);
-      return { ...item, demand, isWeekend, dayName, risk, action, insight: null };
+      const { demand, isWeekend, dayName, period, trend } = predictDemand(item);
+      const { risk, action } = computeRisk(item.inventory, demand, item);
+      return { ...item, demand, isWeekend, dayName, period, trend, risk, action, insight: null };
     });
 
+// ── Trend display helpers ─────────────────────────────────────────────────────
+const TREND_ICON  = { rising: '↑', stable: '→', falling: '↓' };
+const TREND_COLOR = { rising: '#27AE60', stable: '#7F8C8D', falling: '#E74C3C' };
+
+
+// ── Component ─────────────────────────────────────────────────────────────────
 const AIDashboard = () => {
-  const [kitchen,     setKitchen]     = useState(KITCHENS[0]);
-  const [rows,        setRows]        = useState(() => buildRows(KITCHENS[0]));
-  const [aiLoading,   setAiLoading]   = useState(false);
-  const [aiOnline,    setAiOnline]    = useState(null); // null=unknown, true, false
+  const [kitchen,   setKitchen]   = useState(KITCHENS[0]);
+  const [rows,      setRows]      = useState(() => buildRows(KITCHENS[0]));
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiOnline,  setAiOnline]  = useState(null); // null=unknown, true, false
 
   const fetchInsights = useCallback(async (currentRows) => {
     setAiLoading(true);
@@ -87,9 +152,7 @@ const AIDashboard = () => {
     fetchInsights(fresh);
   };
 
-  useEffect(() => {
-    fetchInsights(rows);
-  }, []); // eslint-disable-line
+  useEffect(() => { fetchInsights(rows); }, []); // eslint-disable-line
 
   const today = rows[0];
 
@@ -104,6 +167,8 @@ const AIDashboard = () => {
             Real-time inventory risk analysis · Today is&nbsp;
             <strong>{today?.dayName}</strong>
             {today?.isWeekend && <span className="weekend-badge">Weekend Surge</span>}
+            &nbsp;·&nbsp;
+            <span className="period-badge">{today?.period}</span>
           </p>
         </div>
         <div className="dash-controls">
@@ -122,9 +187,9 @@ const AIDashboard = () => {
 
       {/* AI status bar */}
       <div className={`ai-status-bar ${aiOnline === false ? 'offline' : aiOnline ? 'online' : 'loading'}`}>
-        {aiLoading && '⏳ Fetching AI insights from the server…'}
-        {!aiLoading && aiOnline === true  && '✅ AI insights loaded from CloudKitchen AI service'}
-        {!aiLoading && aiOnline === false && '⚠️ AI service is warming up — rule-based insights shown. Try refreshing in ~15 min after deploy.'}
+        {aiLoading && '⏳ Fetching AI insights from Ollama…'}
+        {!aiLoading && aiOnline === true  && '✅ AI insights powered by open-source LLM via LangChain + Ollama'}
+        {!aiLoading && aiOnline === false && '⚠️ AI service warming up — rule-based insights shown. Retry in ~15 min after deploy.'}
       </div>
 
       {/* Summary cards */}
@@ -146,9 +211,11 @@ const AIDashboard = () => {
           <thead>
             <tr>
               <th>Menu Item</th>
+              <th>Category</th>
               <th>Stock</th>
               <th>Predicted Orders</th>
               <th>Demand Bar</th>
+              <th>Trend</th>
               <th>Risk</th>
               <th>Action</th>
               <th>AI Insight</th>
@@ -156,13 +223,17 @@ const AIDashboard = () => {
           </thead>
           <tbody>
             {rows.map(row => {
-              const pct   = Math.min(100, Math.round((row.demand / (row.inventory || 1)) * 100));
+              const pct      = Math.min(100, Math.round((row.demand / (row.inventory || 1)) * 100));
               const barColor = row.risk === 'UNDERSTOCK' ? '#E74C3C'
                              : row.risk === 'OVERSTOCK'  ? '#F39C12'
                              : '#27AE60';
+              const trendColor = TREND_COLOR[row.trend] || '#7F8C8D';
+              const trendIcon  = TREND_ICON[row.trend]  || '→';
+
               return (
                 <tr key={row.id} className={`risk-row risk-${row.risk.toLowerCase()}`}>
                   <td className="item-name">{row.name}</td>
+                  <td className="category-cell">{row.category}</td>
                   <td className="metric">{row.inventory}</td>
                   <td className="metric highlight">{row.demand}</td>
                   <td className="bar-cell">
@@ -173,6 +244,13 @@ const AIDashboard = () => {
                       />
                     </div>
                     <span className="bar-pct" style={{ color: barColor }}>{pct}%</span>
+                  </td>
+                  <td className="trend-cell">
+                    <span style={{ color: trendColor, fontWeight: 600, fontSize: '1.1rem' }}>
+                      {trendIcon}
+                    </span>
+                    &nbsp;
+                    <span style={{ color: trendColor, fontSize: '0.78rem' }}>{row.trend}</span>
                   </td>
                   <td>
                     <span className={`badge badge-${row.risk.toLowerCase()}`}>{row.risk}</span>
@@ -194,8 +272,9 @@ const AIDashboard = () => {
       </div>
 
       <p className="dash-footnote">
-        Predictions are deterministic per day-of-week · Weekend multipliers applied automatically ·
-        AI insights powered by FLAN-T5 on the CloudKitchen AI service
+        Demand factors: day-of-week × time-of-day ({today?.period}) × 3-day trend ·
+        Weekend surge applied automatically ·
+        AI insights by open-source LLM (Ollama) via LangChain on the CloudKitchen AI service
       </p>
     </div>
   );
