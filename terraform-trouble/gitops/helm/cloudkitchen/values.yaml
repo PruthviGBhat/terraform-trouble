@@ -1,0 +1,70 @@
+# =============================================================================
+# CloudKitchen Helm values
+# =============================================================================
+
+global:
+  region: ap-south-1
+  accountId: "256603361470"
+  ecrRegistry: "256603361470.dkr.ecr.ap-south-1.amazonaws.com"
+  imageTag: latest
+
+# Non-secret config → rendered into the `cloudkitchen-config` ConfigMap and
+# injected into every pod via envFrom. (Secrets live in `cloudkitchen-secrets`,
+# created out-of-band — see README §4.)
+config:
+  sqsOrdersQueueUrl: "https://sqs.ap-south-1.amazonaws.com/256603361470/cloudkitchen-orders-queue"
+  hfModel: "mistralai/Mistral-7B-Instruct-v0.3"
+  userPoolId: "ap-south-1_tEAc9YUys"
+  userClientId: "408bpevc8ou67sspk8lat0bs96"
+  restaurantPoolId: "ap-south-1_jazm2b2jA"
+  restaurantClientId: "11ehvp7enhiflo0ijbr0u93mti"
+
+# The Gateway (kgateway) that fronts all services.
+gateway:
+  name: cloudkitchen-gateway
+  className: kgateway          # the GatewayClass kgateway installs
+  # Annotations propagated to the auto-created LoadBalancer Service.
+  # DEFAULT (no extra setup): the in-tree AWS cloud provider turns this into an
+  # internet-facing NLB. Works out of the box on EKS — no IRSA/controller needed.
+  lbAnnotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+  # PRODUCTION upgrade (optional): install the AWS Load Balancer Controller
+  # (needs OIDC/IRSA) and swap the annotations to:
+  #   service.beta.kubernetes.io/aws-load-balancer-type: "external"
+  #   service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+  #   service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+
+# The 4 backend services. `pathPrefixes` mirror the existing ALB listener rules
+# exactly, so routing behaviour is identical to the EC2 deployment.
+#   order  → /api/orders*           (most specific, evaluated first)
+#   ai     → /api/recommend*, /api/demand*, /api/update_user_preferences*
+#   auth   → /auth/*
+#   menu   → /api  (catch-all; loses to the more specific routes above)
+services:
+  - name: menu
+    repo: cloudkitchen-menu-repo
+    port: 8080
+    replicas: 2
+    pathPrefixes: ["/api"]
+  - name: order
+    repo: cloudkitchen-order-repo
+    port: 8082
+    replicas: 2
+    pathPrefixes: ["/api/orders"]
+  - name: auth
+    repo: cloudkitchen-auth-repo
+    port: 8001
+    replicas: 2
+    pathPrefixes: ["/auth"]
+  - name: ai
+    repo: cloudkitchen-ai-repo
+    port: 8000
+    replicas: 1
+    pathPrefixes: ["/api/recommend", "/api/demand", "/api/update_user_preferences"]
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    memory: 512Mi

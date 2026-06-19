@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cloudkitchen
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: cloudkitchen
+  source:
+    # ── Update these when you move to a dedicated GitOps repo ──
+    repoURL: https://github.com/PruthviGBhat/terraform-trouble.git
+    targetRevision: main
+    path: terraform-trouble/gitops/helm/cloudkitchen
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cloudkitchen
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
