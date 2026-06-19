@@ -19,6 +19,12 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Tolerate uninitialized Hibernate lazy proxies when serializing entities
+  # (Order -> OrderItem -> MenuItem -> Category proxy). Without this, placing or
+  # listing an order throws 500 "No serializer found for ByteBuddyInterceptor".
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
   flyway:
     enabled: false   # schema owned by menu-service
 

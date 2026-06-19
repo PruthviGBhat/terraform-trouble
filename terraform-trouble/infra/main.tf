@@ -401,6 +401,20 @@ resource "aws_iam_role_policy" "app_secrets_policy" {
         Resource = "arn:aws:ssm:${var.aws_region}:${data.aws_caller_identity.current.account_id}:parameter/${local.env_prefix}/*"
       },
       {
+        # Menu service downloads its deployment zip (menu_service.zip) from S3 on boot.
+        # Without this, user-data fails with 403 Forbidden and the service never starts.
+        Sid      = "ReadDeploymentArtifacts"
+        Effect   = "Allow"
+        Action   = ["s3:GetObject"]
+        Resource = "${aws_s3_bucket.testimonials.arn}/*"
+      },
+      {
+        Sid      = "ListDeploymentBucket"
+        Effect   = "Allow"
+        Action   = ["s3:ListBucket"]
+        Resource = aws_s3_bucket.testimonials.arn
+      },
+      {
         Sid    = "CloudWatchLogs"
         Effect = "Allow"
         Action = [
@@ -469,7 +483,7 @@ resource "aws_autoscaling_group" "app" {
   max_size                  = 2
   desired_capacity          = 1
   health_check_type         = "ELB"
-  health_check_grace_period = 900 # 15 min – Maven cold-start on t3.small
+  health_check_grace_period = 1200 # 20 min – headroom for cold Maven build + JVM start on t3.small (prevents kill-mid-build cycling)
   target_group_arns = [
     aws_lb_target_group.app_tg.arn
   ]

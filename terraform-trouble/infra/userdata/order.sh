@@ -66,6 +66,11 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  # Tolerate uninitialized Hibernate lazy proxies (Order->OrderItem->MenuItem->Category)
+  # Without this, placing/listing an order throws 500 (ByteBuddyInterceptor serializer).
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
   flyway:
     enabled: false
 

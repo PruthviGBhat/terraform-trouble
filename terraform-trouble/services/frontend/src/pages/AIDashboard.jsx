@@ -90,8 +90,25 @@ const AIDashboard = () => {
   const [rows,             setRows]             = useState([]);
   const [aiLoading,        setAiLoading]        = useState(false);
   const [aiOnline,         setAiOnline]         = useState(null);
+  const [realDemand,       setRealDemand]       = useState({}); // { itemNameLower: unitsOrdered } from real orders
+  const [realOrders,       setRealOrders]       = useState(0);  // total real orders processed by this app
 
-  // ── Step 1: load menu items from API, fallback to syntheticDemand.json ──────
+  // Pull accumulated REAL order counts from the AI service's SQS-fed demand tracker.
+  // Returns empty when the AI service is offline or no orders exist yet.
+  const loadRealDemand = useCallback(async () => {
+    try {
+      const r = await fetch('/api/demand/realtime');
+      if (!r.ok) throw new Error('offline');
+      const d = await r.json();
+      setRealDemand(d.demand || {});
+      setRealOrders(d.total_orders_processed || 0);
+    } catch {
+      setRealDemand({});
+      setRealOrders(0);
+    }
+  }, []);
+
+  // ── Step 1: load menu items (+ real demand), fallback to syntheticDemand.json ──
   useEffect(() => {
     fetch('/api/menu')
       .then(r => r.ok ? r.json() : Promise.reject('not ok'))
@@ -105,7 +122,8 @@ const AIDashboard = () => {
         setAllItems(fallbackData);
         setDataSource('synthetic');
       });
-  }, []);
+    loadRealDemand();
+  }, [loadRealDemand]);
 
   // ── Step 2: build rows whenever items or category filter changes ─────────────
   const fetchInsights = useCallback(async (currentRows) => {
@@ -116,7 +134,8 @@ const AIDashboard = () => {
         headers: { 'Content-Type': 'application/json' },
         body:    JSON.stringify({
           items: currentRows.map(r => ({
-            id: r.id, name: r.name, inventory: r.inventory, predicted_demand: r.demand,
+            id: r.id, name: r.name, kitchen: r.category || 'CloudKitchen',
+            inventory: r.inventory, predicted_demand: r.demand,
           })),
         }),
       });
@@ -142,13 +161,23 @@ const AIDashboard = () => {
       ? allItems
       : allItems.filter(i => i.category === selectedCategory);
     const fresh = filtered.map(item => {
-      const { demand, isWeekend, dayName, period, trend } = predictDemand(item);
+      const pred = predictDemand(item);
+      // Prefer the REAL number of units ordered for this item (from actual orders);
+      // fall back to the time-of-day estimate when this item has no orders yet.
+      const realCount = realDemand[(item.name || '').trim().toLowerCase()];
+      const usingReal = realCount != null;
+      const demand    = usingReal ? realCount : pred.demand;
       const { risk, action } = computeRisk(item.inventory, demand, item);
-      return { ...item, demand, isWeekend, dayName, period, trend, risk, action, insight: null };
+      return {
+        ...item, demand,
+        demandSource: usingReal ? 'real' : 'estimate',
+        isWeekend: pred.isWeekend, dayName: pred.dayName, period: pred.period, trend: pred.trend,
+        risk, action, insight: null,
+      };
     });
     setRows(fresh);
     if (fresh.length > 0) fetchInsights(fresh);
-  }, [allItems, selectedCategory, fetchInsights]);
+  }, [allItems, selectedCategory, realDemand, fetchInsights]);
 
   const categories = ['All', ...new Set(allItems.map(i => i.category))].sort((a, b) =>
     a === 'All' ? -1 : b === 'All' ? 1 : a.localeCompare(b)
@@ -171,6 +200,12 @@ const AIDashboard = () => {
             <span style={{ fontSize: '0.78rem', color: dataSource === 'api' ? '#27AE60' : '#F39C12' }}>
               {dataSource === 'api' ? '🟢 Live menu data' : dataSource === 'synthetic' ? '🟡 Demo data (API offline)' : '…'}
             </span>
+            &nbsp;·&nbsp;
+            <span style={{ fontSize: '0.78rem', color: realOrders > 0 ? '#27AE60' : '#7F8C8D' }}>
+              {realOrders > 0
+                ? `📊 Demand from ${realOrders} real order${realOrders === 1 ? '' : 's'}`
+                : '🟡 No orders yet — demand estimated'}
+            </span>
           </p>
         </div>
         <div className="dash-controls">
@@ -188,6 +223,7 @@ const AIDashboard = () => {
               .then(r => r.ok ? r.json() : Promise.reject())
               .then(items => { setAllItems((items || []).map(enrichWithDemand)); setDataSource('api'); })
               .catch(() => { setAllItems(fallbackData); setDataSource('synthetic'); });
+            loadRealDemand();
           }}>
             🔄 Refresh
           </button>
@@ -247,7 +283,13 @@ const AIDashboard = () => {
                     <td className="item-name">{row.name}</td>
                     <td className="category-cell">{row.category}</td>
                     <td className="metric">{row.inventory}</td>
-                    <td className="metric highlight">{row.demand}</td>
+                    <td className="metric highlight">
+                      {row.demand}
+                      <span style={{ display: 'block', fontSize: '0.62rem', fontWeight: 400,
+                                     color: row.demandSource === 'real' ? '#27AE60' : '#95A5A6' }}>
+                        {row.demandSource === 'real' ? '📊 real orders' : 'estimated'}
+                      </span>
+                    </td>
                     <td className="bar-cell">
                       <div className="demand-bar-bg">
                         <div className="demand-bar-fill" style={{ width: `${pct}%`, background: barColor }} />
@@ -280,11 +322,11 @@ const AIDashboard = () => {
       )}
 
       <p className="dash-footnote">
-        Demand factors: day-of-week × time-of-day ({today?.period}) × 3-day trend ·
-        Weekend surge applied automatically ·
-        {dataSource === 'api'
-          ? ' Showing live CloudKitchen menu items'
-          : ' API offline — showing demo forecast data'}
+        {realOrders > 0
+          ? `Demand = actual units ordered in your kitchen (${realOrders} order${realOrders === 1 ? '' : 's'} so far). `
+          : 'Demand = time-of-day estimate until real orders arrive (day-of-week × time-of-day × trend). '}
+        Items with no orders yet fall back to an estimate ·
+        {dataSource === 'api' ? ' Live CloudKitchen menu' : ' API offline — demo data'}
       </p>
     </div>
   );

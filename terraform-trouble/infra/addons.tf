@@ -493,8 +493,11 @@ resource "null_resource" "deploy_frontend" {
 
   provisioner "local-exec" {
     working_dir = "${path.module}/../services/frontend"
-    command     = "call npm install && call npm run build && aws s3 sync build/ s3://${aws_s3_bucket.frontend.id} --delete && aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.cdn.id} --paths /*"
-    
+    # bash interpreter → cross-platform (Linux/Mac native, Windows via Git Bash).
+    # The old "call npm" only worked in Windows cmd.exe and broke on other OSes.
+    interpreter = ["bash", "-c"]
+    command     = "npm install && npm run build && aws s3 sync build/ s3://${aws_s3_bucket.frontend.id} --delete && aws cloudfront create-invalidation --distribution-id ${aws_cloudfront_distribution.cdn.id} --paths '/*'"
+
     environment = {
       # Injects the API Gateway URL dynamically so you never have to manually edit .env again!
       REACT_APP_API_GATEWAY_URL = "${aws_apigatewayv2_api.testimonials_api.api_endpoint}"

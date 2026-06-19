@@ -6,6 +6,7 @@
 resource "aws_ecr_repository" "app_repo" {
   name                 = "${local.env_prefix}-app-repo"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true # allow `terraform destroy` to delete the repo even when it holds images
 
   image_scanning_configuration {
     scan_on_push = true
@@ -18,6 +19,7 @@ resource "aws_ecr_repository" "app_repo" {
 resource "aws_ecr_repository" "ai_repo" {
   name                 = "${local.env_prefix}-ai-repo"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true # allow `terraform destroy` to delete the repo even when it holds images
 
   image_scanning_configuration {
     scan_on_push = true
@@ -30,6 +32,7 @@ resource "aws_ecr_repository" "ai_repo" {
 resource "aws_ecr_repository" "auth_repo" {
   name                 = "${local.env_prefix}-auth-repo"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true # allow `terraform destroy` to delete the repo even when it holds images
 
   image_scanning_configuration {
     scan_on_push = true
@@ -66,9 +69,9 @@ resource "aws_ecr_lifecycle_policy" "app_repo_policy" {
       rulePriority = 1
       description  = "Keep last 5 images"
       selection = {
-        tagStatus     = "any"
-        countType     = "imageCountMoreThan"
-        countNumber   = 5
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = 5
       }
       action = {
         type = "expire"
@@ -85,9 +88,9 @@ resource "aws_ecr_lifecycle_policy" "ai_repo_policy" {
       rulePriority = 1
       description  = "Keep last 5 images"
       selection = {
-        tagStatus     = "any"
-        countType     = "imageCountMoreThan"
-        countNumber   = 5
+        tagStatus   = "any"
+        countType   = "imageCountMoreThan"
+        countNumber = 5
       }
       action = {
         type = "expire"
@@ -100,6 +103,7 @@ resource "aws_ecr_lifecycle_policy" "ai_repo_policy" {
 resource "aws_ecr_repository" "menu_repo" {
   name                 = "${local.env_prefix}-menu-repo"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true # allow `terraform destroy` to delete the repo even when it holds images
 
   image_scanning_configuration {
     scan_on_push = true
@@ -131,6 +135,7 @@ resource "aws_ecr_lifecycle_policy" "menu_repo_policy" {
 resource "aws_ecr_repository" "order_repo" {
   name                 = "${local.env_prefix}-order-repo"
   image_tag_mutability = "MUTABLE"
+  force_delete         = true # allow `terraform destroy` to delete the repo even when it holds images
 
   image_scanning_configuration {
     scan_on_push = true
