@@ -5,10 +5,7 @@ metadata:
   labels:
     {{- include "cloudkitchen.labels" . | nindent 4 }}
 data:
+  # STATIC config only. Per-deploy values (SQS URL, Cognito IDs, DB creds, HF
+  # token) come from the out-of-band Secret `cloudkitchen-secrets`, not from Git.
   AWS_REGION: {{ .Values.global.region | quote }}
-  SQS_ORDERS_QUEUE_URL: {{ .Values.config.sqsOrdersQueueUrl | quote }}
   HF_MODEL: {{ .Values.config.hfModel | quote }}
-  USER_POOL_ID: {{ .Values.config.userPoolId | quote }}
-  USER_CLIENT_ID: {{ .Values.config.userClientId | quote }}
-  RESTAURANT_POOL_ID: {{ .Values.config.restaurantPoolId | quote }}
-  RESTAURANT_CLIENT_ID: {{ .Values.config.restaurantClientId | quote }}

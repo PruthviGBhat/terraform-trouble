@@ -11,13 +11,13 @@ global:
 # Non-secret config → rendered into the `cloudkitchen-config` ConfigMap and
 # injected into every pod via envFrom. (Secrets live in `cloudkitchen-secrets`,
 # created out-of-band — see README §4.)
+# Only STATIC config lives here (safe to commit, never changes per deploy).
+# All per-deploy / environment-specific values — DB creds, Cognito pool & client
+# IDs (these REGENERATE on every destroy/recreate), SQS URL, HF token — are
+# injected at deploy time into the out-of-band Secret `cloudkitchen-secrets` by
+# bootstrap/load-runtime-config.sh. They are NEVER committed to Git.
 config:
-  sqsOrdersQueueUrl: "https://sqs.ap-south-1.amazonaws.com/256603361470/cloudkitchen-orders-queue"
   hfModel: "mistralai/Mistral-7B-Instruct-v0.3"
-  userPoolId: "ap-south-1_tEAc9YUys"
-  userClientId: "408bpevc8ou67sspk8lat0bs96"
-  restaurantPoolId: "ap-south-1_jazm2b2jA"
-  restaurantClientId: "11ehvp7enhiflo0ijbr0u93mti"
 
 # The Gateway (kgateway) that fronts all services.
 gateway:
